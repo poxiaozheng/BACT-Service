@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 @Slf4j
 @RestController
@@ -25,8 +26,8 @@ public class BACTService {
                 Arrays.toString(pictureArray));
         //TODO pictureArray解析成图片
         // 生成唯一id
-        // 生成随机receipt
         // 调用命令行工具进行图片转换
+        // 原始图片、转换图片、id和receipt的保存
         Map<String, Object> map = new HashMap<>();
         map.put("statusCode", 0);
         map.put("imageId", "2");
@@ -65,7 +66,22 @@ public class BACTService {
         return map;
     }
 
+    public static String createRandomStr(int length){
+        String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(62);
+            stringBuilder.append(str.charAt(number));
+        }
+        return stringBuilder.toString();
+    }
+
+
     public static void main(String[] args) {
-        SpringApplication.run(BACTService.class, args);
+        System.out.println(createRandomStr(24));
+        System.out.println(createRandomStr(24));
+        System.out.println(createRandomStr(24));
+        //SpringApplication.run(BACTService.class, args);
     }
 }
