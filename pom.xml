@@ -13,6 +13,7 @@
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
+<!--    换源为阿里云-->
     <repositories>
         <repository>
             <id>alimaven</id>
@@ -21,18 +22,21 @@
         </repository>
     </repositories>
 
+<!--    依赖管理，以后的依赖不需要申明版本号-->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.1.8.RELEASE </version>
     </parent>
 
+<!--    springweb 核心组件-->
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+<!--        提供@Slf4j日志和简化Java bean getter setter代码-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
