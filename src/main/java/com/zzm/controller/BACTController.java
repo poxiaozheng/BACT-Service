@@ -15,7 +15,7 @@ import java.util.*;
 public class BACTController {
 
     private volatile int imageId = 0;
-    private List<ImageEntity> list = new ArrayList<>();
+    private final List<ImageEntity> list = new ArrayList<>();
 
     @Autowired
     private BACTServiceAsync bactServiceAsync;
@@ -34,17 +34,18 @@ public class BACTController {
         }
         log.debug("scale:" + scale + ",noiseGrade:" + noiseGrade + ",pictureArray:" +
                 Arrays.toString(pictureArray));
-
-        String originImagePath = "D:\\waifu2x\\input\\" + System.currentTimeMillis() + "_input.jpg";
+        String originImagePath = "D:\\learnCode\\BACTService\\src\\main\\resources\\static\\input\\"
+                + System.currentTimeMillis() + "_input.jpg";
+        String processImageUrl = System.currentTimeMillis() + "_output.png";
+        String processedImagePath = "D:\\learnCode\\BACTService\\src\\main\\resources\\static\\output\\"
+                + processImageUrl;
         AppUtil.byteArrayToFile(pictureArray, originImagePath);
         String cmd1 = "cd D:\\waifu2x";
-        String processedImagePath = "D:\\waifu2x\\ouput\\" + System.currentTimeMillis() + "_output.png";
         String id = String.valueOf(imageId++);
         String receipt = AppUtil.createRandomStr(20);
-
         bactServiceAsync.callCmdToTransform(cmd1, originImagePath, processedImagePath, noiseGrade, scale, id);
-
-        saveData(id, receipt, originImagePath, processedImagePath);
+        String savePath = "127.0.0.1:8081/bact/output/" + processImageUrl;
+        saveData(id, receipt, originImagePath, savePath);
         return postOriginImageSuccessResponse(id, receipt);
     }
 
@@ -64,17 +65,18 @@ public class BACTController {
             return queryProgressErrorResponse();
         }
         log.debug("imageId:" + imageId + ",receipt:" + receipt);
-        //TODO
-        // 校验imageId与receipt是否正确
-        // 正确的话看图片是否转换成功
-        // 是的话即可返回imageUrl
-
-
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("statusCode", 0);
-        map.put("imageUrl", "http://oppo.com");
-        return map;
+        Iterator<ImageEntity> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            ImageEntity imageEntity = iterator.next();
+            if (imageEntity.getImageId().equals(imageId) && imageEntity.getReceipt().equals(receipt)) {
+                if (bactServiceAsync.hashSet.contains(imageId)) {
+                    iterator.remove();
+                    bactServiceAsync.hashSet.remove(imageId);
+                    return queryProgressSuccessResponse(imageEntity.getProcessedImagePath());
+                }
+            }
+        }
+        return queryProgressErrorResponse();
     }
 
     private HashMap<String, Object> postOriginImageSuccessResponse(String imageId, String receipt) {

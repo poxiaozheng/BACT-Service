@@ -15,6 +15,6 @@ public class ImageEntity {
     @Override
     public String toString() {
         return "ImageEntity [originImage=" + originImagePath + ",imageId=" + imageId + ",receipt=" +
-                receipt + ",processedImage=" + processedImagePath;
+                receipt + ",processedImage=" + processedImagePath+"]";
     }
 }
