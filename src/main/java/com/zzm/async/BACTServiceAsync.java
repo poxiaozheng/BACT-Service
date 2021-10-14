@@ -14,11 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class BACTServiceAsync {
 
-    public HashSet<String> hashSet = new HashSet<>();
-
     @Async("taskExecutor")
-    public void callCmdToTransform(String cmd1, String inputImagePath, String outputImagePath, int noiseGrade, int scale,
-                                   String id) {
+    public void callCmdToTransform(String cmd1, String inputImagePath, String outputImagePath, int noiseGrade,
+                                   int scale) {
         Runtime runtime = Runtime.getRuntime();
         Process process = null;
         String cmd2 = "waifu2x-ncnn-vulkan.exe -i " + inputImagePath + " -o " + outputImagePath + " -n " + noiseGrade + " -s " + scale;
@@ -31,7 +29,6 @@ public class BACTServiceAsync {
                 System.out.println(line + "\n");
             }
             System.out.println("cmd run finish!");
-            hashSet.add(id);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

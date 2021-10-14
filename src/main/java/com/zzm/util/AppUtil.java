@@ -2,21 +2,12 @@ package com.zzm.util;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.Random;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 public class AppUtil {
-
-    public static String createRandomStr(int length) {
-        String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random random = new Random();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            int number = random.nextInt(62);
-            stringBuilder.append(str.charAt(number));
-        }
-        return stringBuilder.toString();
-    }
 
     public static byte[] fileToByteArray(File image) {
         byte[] bytes = null;
