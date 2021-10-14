@@ -32,7 +32,7 @@ public class BACTController {
         if (scale == null && noiseGrade == null && pictureArray == null) {
             return postOriginImageErrorResponse();
         }
-        log.debug("scale:" + scale + ",noiseGrade:" + noiseGrade + ",pictureArray:" +
+        System.out.println("scale:" + scale + ",noiseGrade:" + noiseGrade + ",pictureArray:" +
                 Arrays.toString(pictureArray));
         String originImagePath = "D:\\learnCode\\BACTService\\src\\main\\resources\\static\\input\\"
                 + System.currentTimeMillis() + "_input.jpg";
@@ -40,10 +40,12 @@ public class BACTController {
         String processedImagePath = "D:\\learnCode\\BACTService\\src\\main\\resources\\static\\output\\"
                 + processImageUrl;
         AppUtil.byteArrayToFile(pictureArray, originImagePath);
+
         String cmd1 = "cd D:\\waifu2x";
         String id = String.valueOf(imageId++);
         String receipt = AppUtil.createRandomStr(20);
         bactServiceAsync.callCmdToTransform(cmd1, originImagePath, processedImagePath, noiseGrade, scale, id);
+
         String savePath = "127.0.0.1:8081/bact/output/" + processImageUrl;
         saveData(id, receipt, originImagePath, savePath);
         return postOriginImageSuccessResponse(id, receipt);
