@@ -40,7 +40,7 @@ public class BACTController {
     @Autowired
     private BACTServiceAsync bactServiceAsync;
 
-    @RequestMapping("/hello")
+    @GetMapping("/hello")
     private String hello() {
         return "hello world zzm!";
     }
@@ -55,23 +55,34 @@ public class BACTController {
 
     @PostMapping("/postOriginImage")
     @ResponseBody
-    private synchronized HashMap<String, Object> postOriginImage(@RequestParam("scale") Integer scale, @RequestParam("noiseGrade")
-            Integer noiseGrade, @RequestBody byte[] pictureArray) {
+    private synchronized HashMap<String, Object> postOriginImage
+            (@RequestParam("scale") Integer scale,
+             @RequestParam("noiseGrade")
+                     Integer noiseGrade,
+             @RequestBody byte[] pictureArray) {
+
         if (scale == null && noiseGrade == null && pictureArray == null) {
             return postOriginImageErrorResponse();
         }
         System.out.println("scale:" + scale + ",noiseGrade:" + noiseGrade);
 
         long imagePre = System.currentTimeMillis();
+
         String originImageUrl = imagePre + "_input.jpg";
         String processImageUrl = imagePre + "_output.png";
         File originImagePath = new File(inputDir, originImageUrl);
-        String processedImagePath = outputDir.getAbsolutePath() + processImageUrl;
+        File processedImagePath = new File(outputDir, processImageUrl);
         AppUtil.byteArrayToFile(pictureArray, originImagePath.getAbsolutePath());
 
         String id = String.valueOf(imageId++);
         String receipt = AppUtil.createRandomStr(20);
-        bactServiceAsync.callCmdToTransform(originImagePath.getAbsolutePath(), processedImagePath, noiseGrade, scale, id);
+        bactServiceAsync.callCmdToTransform(
+                originImagePath.getAbsolutePath(),
+                processedImagePath.getAbsolutePath(),
+                noiseGrade,
+                scale,
+                id);
+
         // 不再需要加前缀。
         String savePath = processImageUrl;
         saveData(id, receipt, originImagePath.getAbsolutePath(), savePath);
@@ -97,7 +108,8 @@ public class BACTController {
         Iterator<ImageEntity> iterator = list.iterator();
         while (iterator.hasNext()) {
             ImageEntity imageEntity = iterator.next();
-            if (imageEntity.getImageId().equals(imageId) && imageEntity.getReceipt().equals(receipt)) {
+            if (imageEntity.getImageId().equals(imageId) && imageEntity.getReceipt()
+                                                                       .equals(receipt)) {
                 System.out.println("bactServiceAsync.hashSet:" + BACTServiceAsync.hashSet);
                 if (BACTServiceAsync.hashSet.contains(imageId)) {
                     iterator.remove();
