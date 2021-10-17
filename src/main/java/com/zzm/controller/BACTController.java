@@ -131,6 +131,7 @@ public class BACTController {
 
             return ResponseEntity
                     .ok()
+                    .contentType(MediaType.IMAGE_PNG)
                     .body(ins);
         } catch (FileNotFoundException fineNotFound) {
             return ResponseEntity.badRequest().body("File " + fileName + " not found!");
