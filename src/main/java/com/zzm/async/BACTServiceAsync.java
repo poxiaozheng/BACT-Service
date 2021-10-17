@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class BACTServiceAsync {
 
-    public HashSet<String> hashSet = new HashSet<>();
+    public volatile static HashSet<String> hashSet = new HashSet<>();
 
     @Async("taskExecutor")
     public void callCmdToTransform(String cmd1, String inputImagePath, String outputImagePath, int noiseGrade, int scale,

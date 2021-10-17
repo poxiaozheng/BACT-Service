@@ -6,13 +6,22 @@ import com.zzm.service.BACTService;
 import com.zzm.util.AppUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.*;
 
 @Slf4j
 @RestController
 public class BACTController {
+
+    //TODO 根据具体PAth更换
+    String originImagePathPre = "D:\\Code\\back\\BACT-Service\\src\\main\\resources\\static\\input\\";
+    String processedImagePathPre = "D:\\Code\\back\\BACT-Service\\target\\classes\\static\\output\\";
+    //TODO 根据具体ip地址更换
+    String saveImagePathPre = "http://192.168.88.194:8081/bact/output/";
 
     private volatile int imageId = 0;
     private final List<ImageEntity> list = new ArrayList<>();
@@ -25,6 +34,14 @@ public class BACTController {
         return "hello world zzm!";
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<byte[]> sendSampleImage() {
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(AppUtil.fileToByteArray(new File("sample.png")));
+    }
+
     @PostMapping("/postOriginImage")
     @ResponseBody
     private synchronized HashMap<String, Object> postOriginImage(@RequestParam("scale") Integer scale, @RequestParam("noiseGrade")
@@ -32,21 +49,20 @@ public class BACTController {
         if (scale == null && noiseGrade == null && pictureArray == null) {
             return postOriginImageErrorResponse();
         }
-        log.debug("scale:" + scale + ",noiseGrade:" + noiseGrade + ",pictureArray:" +
-                Arrays.toString(pictureArray));
-        System.out.println("scale:" + scale + ",noiseGrade:" + noiseGrade + ",pictureArray:" +
-                Arrays.toString(pictureArray));
-        String originImagePath = "D:\\learnCode\\BACTService\\src\\main\\resources\\static\\input\\"
-                + System.currentTimeMillis() + "_input.jpg";
-        String processImageUrl = System.currentTimeMillis() + "_output.png";
-        String processedImagePath = "D:\\learnCode\\BACTService\\src\\main\\resources\\static\\output\\"
-                + processImageUrl;
+        System.out.println("scale:" + scale + ",noiseGrade:" + noiseGrade);
+
+        long imagePre = System.currentTimeMillis();
+        String originImageUrl = imagePre + "_input.jpg";
+        String processImageUrl = imagePre + "_output.png";
+        String originImagePath = originImagePathPre + originImageUrl;
+        String processedImagePath = processedImagePathPre + processImageUrl;
         AppUtil.byteArrayToFile(pictureArray, originImagePath);
-        String cmd1 = "cd D:\\waifu2x";
+
+        String cmd1 = "cd D:\\PictureEnlarge\\waifu2x";
         String id = String.valueOf(imageId++);
         String receipt = AppUtil.createRandomStr(20);
         bactServiceAsync.callCmdToTransform(cmd1, originImagePath, processedImagePath, noiseGrade, scale, id);
-        String savePath = "192.168.88.194:8081/bact/output/" + processImageUrl;
+        String savePath = saveImagePathPre + processImageUrl;
         saveData(id, receipt, originImagePath, savePath);
         return postOriginImageSuccessResponse(id, receipt);
     }
@@ -66,14 +82,15 @@ public class BACTController {
         if (imageId == null && receipt == null) {
             return queryProgressErrorResponse();
         }
-        log.debug("imageId:" + imageId + ",receipt:" + receipt);
+        System.out.println("imageId:" + imageId + ",receipt:" + receipt);
         Iterator<ImageEntity> iterator = list.iterator();
         while (iterator.hasNext()) {
             ImageEntity imageEntity = iterator.next();
             if (imageEntity.getImageId().equals(imageId) && imageEntity.getReceipt().equals(receipt)) {
-                if (bactServiceAsync.hashSet.contains(imageId)) {
+                System.out.println("bactServiceAsync.hashSet:"+ BACTServiceAsync.hashSet);
+                if (BACTServiceAsync.hashSet.contains(imageId)) {
                     iterator.remove();
-                    bactServiceAsync.hashSet.remove(imageId);
+                    BACTServiceAsync.hashSet.remove(imageId);
                     return queryProgressSuccessResponse(imageEntity.getProcessedImagePath());
                 }
             }
