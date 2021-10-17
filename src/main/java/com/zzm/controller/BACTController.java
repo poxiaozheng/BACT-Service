@@ -7,6 +7,7 @@ import com.zzm.util.AppUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -122,11 +123,15 @@ public class BACTController {
     }
 
     @GetMapping("/output/{fileName}")
-    public ResponseEntity<Object> getOutput(@PathVariable("fileName") String fileName) throws FileNotFoundException {
+    public ResponseEntity<Object> getOutput(@PathVariable("fileName") String fileName) {
         try {
+
+            // wrap output file as stream resource.
+            InputStreamResource ins = new InputStreamResource(new FileInputStream(new File(outputDir, fileName)));
+
             return ResponseEntity
                     .ok()
-                    .body(new FileInputStream(new File(outputDir, fileName)));
+                    .body(ins);
         } catch (FileNotFoundException fineNotFound) {
             return ResponseEntity.badRequest().body("File " + fileName + " not found!");
         }
