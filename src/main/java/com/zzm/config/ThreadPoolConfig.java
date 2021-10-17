@@ -1,48 +1,61 @@
 package com.zzm.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import javax.annotation.PostConstruct;
+import java.io.File;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 @EnableAsync
 public class ThreadPoolConfig {
 
-    /**
-     * 核心线程数
-     */
-    private int corePoolSize = 5;
 
-    /**
-     * 线程池维护线程的最大数量
-     */
-    private int maxPoolSize = 5;
+    @Value("${waifu2x.input}")
+    private File inputDir;
 
-    /**
-     * 缓存队列
-     */
-    private int queueCapacity = 15;
+    @Value("${waifu2x.output}")
+    private File outputDir;
 
-    /**
-     * 允许的空闲时间
-     * 默认为60
-     */
-    private int keepAlive = 100;
+    @Value("${waifu2x.executable}")
+
+    @PostConstruct
+    private void init() {
+        makeWaifu2xWorkingDirectory();
+    }
 
     @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         // 设置核心线程数
+        /**
+         * 核心线程数
+         */
+        int corePoolSize = 5;
         executor.setCorePoolSize(corePoolSize);
         // 设置最大线程数
+        /**
+         * 线程池维护线程的最大数量
+         */
+        int maxPoolSize = 5;
         executor.setMaxPoolSize(maxPoolSize);
         // 设置队列容量
+        /**
+         * 缓存队列
+         */
+        int queueCapacity = 15;
         executor.setQueueCapacity(queueCapacity);
         // 设置允许的空闲时间（秒）
+        /**
+         * 允许的空闲时间
+         * 默认为60
+         */
+        int keepAlive = 100;
         executor.setKeepAliveSeconds(keepAlive);
         // 设置默认线程名称
         executor.setThreadNamePrefix("bact_thread-");
@@ -52,6 +65,22 @@ public class ThreadPoolConfig {
         // 等待所有任务结束后再关闭线程池
         executor.setWaitForTasksToCompleteOnShutdown(true);
         return executor;
+    }
+
+    /**
+     * Ensure waifu2x's working directory(input, output) is created.
+     */
+    private void makeWaifu2xWorkingDirectory() {
+        createDirectoryIfNotExists(inputDir);
+        createDirectoryIfNotExists(outputDir);
+    }
+
+    private static void createDirectoryIfNotExists(File directory) {
+        if (!directory.exists()) {
+            if (!directory.mkdirs()) {
+                throw new IllegalArgumentException("Cannot create waifu2x's input directory on: " + directory.getAbsolutePath());
+            }
+        }
     }
 
 }

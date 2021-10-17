@@ -1,6 +1,8 @@
 package com.zzm.async;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jni.Proc;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -14,25 +16,26 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class BACTServiceAsync {
 
+
+    @Value("${waifu2x.executable}")
+    private String waifu2x;
+
     public volatile static HashSet<String> hashSet = new HashSet<>();
 
     @Async("taskExecutor")
-    public void callCmdToTransform(String cmd1, String inputImagePath, String outputImagePath, int noiseGrade, int scale,
-                                   String id) {
-        Runtime runtime = Runtime.getRuntime();
+    public void callCmdToTransform(String inputImagePath, String outputImagePath, int noiseGrade, int scale, String id) {
+
+        ProcessBuilder pb = new ProcessBuilder();
+        pb.command(waifu2x, "-i", inputImagePath, "-o", outputImagePath, "-n", String.valueOf(noiseGrade), "-s", String.valueOf(scale));
+
+
         Process process = null;
-        String cmd2 = "waifu2x-ncnn-vulkan.exe -i " + inputImagePath + " -o " + outputImagePath + " -n " + noiseGrade + " -s " + scale;
         try {
-            // cmd /c是运行完后关闭窗口，两个cmd命令中间用&&连接起来
-            process = runtime.exec("cmd /c " + cmd1 + " && " + cmd2);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "GBK"));
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line + "\n");
-            }
-            System.out.println("cmd run finish!");
+            process = pb.start();
+            int exitCode = process.waitFor();
+            System.out.println("cmd run finish! with code: " + exitCode);
             hashSet.add(id);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         } finally {
             if (process != null) {

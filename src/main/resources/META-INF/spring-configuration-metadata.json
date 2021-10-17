@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "waifu2x.input",
+      "type": "java.io.File",
+      "description": "waifu2x's input directory."
+    },
+    {
+      "name": "waifu2x.output",
+      "type": "java.io.File",
+      "description": "waifu2x's output directory."
+    },
+    {
+      "name": "waifu2x.executable",
+      "type": "java.lang.String",
+      "description": "waifu2x's executable file name."
+    }
+  ]
+}
