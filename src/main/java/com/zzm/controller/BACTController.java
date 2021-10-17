@@ -14,13 +14,19 @@ import java.util.HashMap;
 @RestController
 public class BACTController {
 
-    String originImagePathPre = "D:\\learnCode\\BACTService\\src\\main\\resources\\static\\input\\";
-    String processedImagePathPre = "D:\\learnCode\\BACTService\\target\\classes\\static\\output\\";
-    //TODO 跟进具体ip更换127.0.0.1:8081
-    String saveImagePathPre = "127.0.0.1:8081/bact/output/";
+    //TODO 根据具体PAth更换
+    String originImagePathPre = "D:\\Code\\back\\BACT-Service\\src\\main\\resources\\static\\input\\";
+    String processedImagePathPre = "D:\\Code\\back\\BACT-Service\\target\\classes\\static\\output\\";
+    //TODO 根据具体ip地址更换
+    String saveImagePathPre = "http://192.168.88.194:8081/bact/output/";
 
     @Autowired
     private BACTServiceAsync bactServiceAsync;
+
+    @RequestMapping("/hello")
+    private String hello(){
+        return "hello world！";
+    }
 
     @PostMapping("/postOriginImage")
     @ResponseBody
@@ -29,8 +35,7 @@ public class BACTController {
         if (scale == null && noiseGrade == null && pictureArray == null) {
             return postOriginImageErrorResponse();
         }
-        System.out.println("scale:" + scale + ",noiseGrade:" + noiseGrade + ",pictureArray:" +
-                Arrays.toString(pictureArray));
+        System.out.println("scale:" + scale + ",noiseGrade:" + noiseGrade);
 
         long imagePre = System.currentTimeMillis();
         String originImageUrl = imagePre + "_input.jpg";
@@ -38,10 +43,10 @@ public class BACTController {
         String originImagePath = originImagePathPre + originImageUrl;
         String processedImagePath = processedImagePathPre + processImageUrl;
         AppUtil.byteArrayToFile(pictureArray, originImagePath);
-        String cmd1 = "cd D:\\waifu2x";
+        String cmd1 = "cd D:\\PictureEnlarge\\waifu2x";
         bactServiceAsync.callCmdToTransform(cmd1, originImagePath, processedImagePath, noiseGrade, scale);
-        String savePath = saveImagePathPre + processImageUrl;
-        return postOriginImageSuccessResponse(savePath);
+           String savePath = saveImagePathPre + processImageUrl;
+           return postOriginImageSuccessResponse(savePath);
     }
 
     private HashMap<String, Object> postOriginImageSuccessResponse(String imageUrl) {
