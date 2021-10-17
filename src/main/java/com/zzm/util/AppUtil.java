@@ -1,5 +1,8 @@
 package com.zzm.util;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -33,15 +36,9 @@ public class AppUtil {
         return bytes;
     }
 
-    public static void byteArrayToFile(byte[] byteArray, String filePath) {
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
+    public static void byteArrayToFile(byte[] byteArray, String filePath) throws IOException {
         //这样子写 try 可以自动关闭 byteArrayInputStream
-        try (byteArrayInputStream) {
-            BufferedImage bufferedImage = ImageIO.read(byteArrayInputStream);
-            File file = new File(filePath);
-            ImageIO.write(bufferedImage, "jpg", file);//不管输出什么格式图片，此处不需改动
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+            FileUtils.writeByteArrayToFile(new File(filePath), byteArray);
     }
 }

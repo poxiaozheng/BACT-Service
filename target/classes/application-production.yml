@@ -1,0 +1,9 @@
+server:
+  port: 8081
+
+waifu2x:
+  # mount docker's /root/app directory to physical machine's path.
+  # docker run -v /path/to/physical:/root/app
+  input: /root/app/waifu2x/input
+  output: /root/app/waifu2x/output
+  executable: waifu2x

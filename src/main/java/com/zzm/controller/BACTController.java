@@ -2,7 +2,6 @@ package com.zzm.controller;
 
 import com.zzm.async.BACTServiceAsync;
 import com.zzm.entity.ImageEntity;
-import com.zzm.service.BACTService;
 import com.zzm.util.AppUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @RestController
@@ -29,8 +29,8 @@ public class BACTController {
 //    //TODO 根据具体ip地址更换
 //    String saveImagePathPre = "http://192.168.88.194:8081/bact/output/";
 
-    private volatile int imageId = 0;
-    private final List<ImageEntity> list = new ArrayList<>();
+    private volatile AtomicInteger imageId = new AtomicInteger(0);
+    private final List<ImageEntity> list = Collections.synchronizedList(new ArrayList<>());
 
     @Value("${waifu2x.input}")
     private File inputDir;
@@ -60,7 +60,7 @@ public class BACTController {
             (@RequestParam("scale") Integer scale,
              @RequestParam("noiseGrade")
                      Integer noiseGrade,
-             @RequestBody byte[] pictureArray) {
+             @RequestBody byte[] pictureArray) throws IOException {
 
         if (scale == null && noiseGrade == null && pictureArray == null) {
             return postOriginImageErrorResponse();
@@ -75,7 +75,7 @@ public class BACTController {
         File processedImagePath = new File(outputDir, processImageUrl);
         AppUtil.byteArrayToFile(pictureArray, originImagePath.getAbsolutePath());
 
-        String id = String.valueOf(imageId++);
+        String id = String.valueOf(imageId.getAndIncrement());
         String receipt = AppUtil.createRandomStr(20);
         bactServiceAsync.callCmdToTransform(
                 originImagePath.getAbsolutePath(),
@@ -110,11 +110,11 @@ public class BACTController {
         while (iterator.hasNext()) {
             ImageEntity imageEntity = iterator.next();
             if (imageEntity.getImageId().equals(imageId) && imageEntity.getReceipt()
-                                                                       .equals(receipt)) {
-                System.out.println("bactServiceAsync.hashSet:" + BACTServiceAsync.hashSet);
-                if (BACTServiceAsync.hashSet.contains(imageId)) {
+                    .equals(receipt)) {
+                System.out.println("bactServiceAsync.hashSet:" + BACTServiceAsync.concurrentHashMap);
+                if (BACTServiceAsync.concurrentHashMap.contains(imageId)) {
                     iterator.remove();
-                    BACTServiceAsync.hashSet.remove(imageId);
+                    BACTServiceAsync.concurrentHashMap.remove(imageId);
                     return queryProgressSuccessResponse(imageEntity.getProcessedImagePath());
                 }
             }

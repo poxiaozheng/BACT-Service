@@ -1,0 +1,7 @@
+server:
+  port: 8081
+
+waifu2x:
+  input: ${user.home}/waifu2x/input
+  output: ${user.home}/waifu2x/output
+  executable: waifu2x

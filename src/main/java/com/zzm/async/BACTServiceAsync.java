@@ -20,7 +20,7 @@ public class BACTServiceAsync {
     @Value("${waifu2x.executable}")
     private String waifu2x;
 
-    public volatile static HashSet<String> hashSet = new HashSet<>();
+    public  static ConcurrentHashMap<String,String> concurrentHashMap = new ConcurrentHashMap<>();
 
     @Async("taskExecutor")
     public void callCmdToTransform(String inputImagePath, String outputImagePath, int noiseGrade, int scale, String id) {
@@ -34,7 +34,7 @@ public class BACTServiceAsync {
             process = pb.start();
             int exitCode = process.waitFor();
             System.out.println("cmd run finish! with code: " + exitCode);
-            hashSet.add(id);
+            concurrentHashMap.put(id,id);
         } catch (Throwable e) {
             e.printStackTrace();
         } finally {
