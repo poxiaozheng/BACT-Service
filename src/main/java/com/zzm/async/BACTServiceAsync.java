@@ -16,19 +16,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class BACTServiceAsync {
 
-
     @Value("${waifu2x.executable}")
     private String waifu2x;
 
-    public  static ConcurrentHashMap<String,String> concurrentHashMap = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String,String> concurrentHashMap = new ConcurrentHashMap<>();
 
     @Async("taskExecutor")
     public void callCmdToTransform(String inputImagePath, String outputImagePath, int noiseGrade, int scale, String id) {
 
         ProcessBuilder pb = new ProcessBuilder();
         pb.command(waifu2x, "-i", inputImagePath, "-o", outputImagePath, "-n", String.valueOf(noiseGrade), "-s", String.valueOf(scale));
-
-
+        
         Process process = null;
         try {
             process = pb.start();

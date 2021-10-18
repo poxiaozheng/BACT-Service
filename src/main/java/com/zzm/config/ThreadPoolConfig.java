@@ -15,14 +15,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 @EnableAsync
 public class ThreadPoolConfig {
 
-
     @Value("${waifu2x.input}")
     private File inputDir;
 
     @Value("${waifu2x.output}")
     private File outputDir;
-
-    @Value("${waifu2x.executable}")
 
     @PostConstruct
     private void init() {
@@ -32,36 +29,30 @@ public class ThreadPoolConfig {
     @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
         // 设置核心线程数
-        /**
-         * 核心线程数
-         */
         int corePoolSize = 5;
         executor.setCorePoolSize(corePoolSize);
+
         // 设置最大线程数
-        /**
-         * 线程池维护线程的最大数量
-         */
         int maxPoolSize = 5;
         executor.setMaxPoolSize(maxPoolSize);
+
         // 设置队列容量
-        /**
-         * 缓存队列
-         */
         int queueCapacity = 15;
         executor.setQueueCapacity(queueCapacity);
+
         // 设置允许的空闲时间（秒）
-        /**
-         * 允许的空闲时间
-         * 默认为60
-         */
         int keepAlive = 100;
         executor.setKeepAliveSeconds(keepAlive);
+
         // 设置默认线程名称
         executor.setThreadNamePrefix("bact_thread-");
+
         // 设置拒绝策略rejection-policy：当pool已经达到max size的时候，如何处理新任务
         // CALLER_RUNS：不在新线程中执行任务，而是由调用者所在的线程来执行
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+
         // 等待所有任务结束后再关闭线程池
         executor.setWaitForTasksToCompleteOnShutdown(true);
         return executor;

@@ -23,12 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequestMapping("/bact")
 public class BACTController {
 
-//    //TODO 根据具体PAth更换
-//    String originImagePathPre = "D:\\Code\\back\\BACT-Service\\src\\main\\resources\\static\\input\\";
-//    String processedImagePathPre = "D:\\Code\\back\\BACT-Service\\target\\classes\\static\\output\\";
-//    //TODO 根据具体ip地址更换
-//    String saveImagePathPre = "http://192.168.88.194:8081/bact/output/";
-
     private volatile AtomicInteger imageId = new AtomicInteger(0);
     private final List<ImageEntity> list = Collections.synchronizedList(new ArrayList<>());
 
@@ -44,14 +38,6 @@ public class BACTController {
     @GetMapping("/hello")
     private String hello() {
         return "hello world zzm!";
-    }
-
-    @GetMapping("/test")
-    public ResponseEntity<byte[]> sendSampleImage() {
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.IMAGE_PNG)
-                .body(AppUtil.fileToByteArray(new File("sample.png")));
     }
 
     @PostMapping("/postOriginImage")
@@ -84,9 +70,7 @@ public class BACTController {
                 scale,
                 id);
 
-        // 不再需要加前缀。
-        String savePath = processImageUrl;
-        saveData(id, receipt, originImagePath.getAbsolutePath(), savePath);
+        saveData(id, receipt, originImagePath.getAbsolutePath(), processImageUrl);
         return postOriginImageSuccessResponse(id, receipt);
     }
 
@@ -102,16 +86,17 @@ public class BACTController {
     @RequestMapping("/queryProgress")
     @ResponseBody
     private Object queryProgress(@RequestParam("imageId") String imageId, @RequestParam("receipt") String receipt) {
+
         if (imageId == null && receipt == null) {
             return queryProgressErrorResponse();
         }
         System.out.println("imageId:" + imageId + ",receipt:" + receipt);
+
         Iterator<ImageEntity> iterator = list.iterator();
         while (iterator.hasNext()) {
             ImageEntity imageEntity = iterator.next();
             if (imageEntity.getImageId().equals(imageId) && imageEntity.getReceipt()
                     .equals(receipt)) {
-                System.out.println("bactServiceAsync.hashSet:" + BACTServiceAsync.concurrentHashMap);
                 if (BACTServiceAsync.concurrentHashMap.contains(imageId)) {
                     iterator.remove();
                     BACTServiceAsync.concurrentHashMap.remove(imageId);
@@ -125,7 +110,6 @@ public class BACTController {
     @GetMapping("/output/{fileName}")
     public ResponseEntity<Object> getOutput(@PathVariable("fileName") String fileName) {
         try {
-
             // wrap output file as stream resource.
             InputStreamResource ins = new InputStreamResource(new FileInputStream(new File(outputDir, fileName)));
 
