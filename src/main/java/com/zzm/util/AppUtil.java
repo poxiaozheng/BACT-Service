@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Random;
 
 public class AppUtil {
@@ -24,5 +25,10 @@ public class AppUtil {
 
     public static void byteArrayToFile(byte[] byteArray, String filePath) throws IOException {
         FileUtils.writeByteArrayToFile(new File(filePath), byteArray);
+    }
+
+    public static String timeStampToData(long timeStamp){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        return simpleDateFormat.format(timeStamp);
     }
 }

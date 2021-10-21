@@ -53,8 +53,8 @@ public class BACTController {
         }
         System.out.println("scale:" + scale + ",noiseGrade:" + noiseGrade);
 
-        long imagePre = System.currentTimeMillis();
-
+        long currentTimeStamp = System.currentTimeMillis();
+        String imagePre = AppUtil.timeStampToData(currentTimeStamp);
         String originImageUrl = imagePre + "_input.jpg";
         String processImageUrl = imagePre + "_output.png";
         File originImagePath = new File(inputDir, originImageUrl);
